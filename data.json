@@ -1,0 +1,26 @@
+{
+  "instructors": [
+    {
+      "avatar_url": "http://asd",
+      "name": "asd",
+      "birth": "2020-06-27",
+      "gender": "M",
+      "services": "asd"
+    },
+    {
+      "avatar_url": "http://ssssssssss",
+      "name": "dsfg",
+      "birth": "2020-06-19",
+      "gender": "F",
+      "services": "asfd"
+    },
+    {
+      "avatar_url": "http://asd",
+      "name": "asfd",
+      "birth": "2020-06-25",
+      "gender": "M",
+      "services": "asd",
+      "created_at": 1593279590152
+    }
+  ]
+}
