@@ -1,3 +1,13 @@
 {
-  "instructors": []
+  "instructors": [
+    {
+      "id": 1,
+      "avatar_url": "http://google.com",
+      "name": "Solano",
+      "birth": 879379200000,
+      "gender": "M",
+      "services": "A, b, c",
+      "created_at": 1593524275268
+    }
+  ]
 }
