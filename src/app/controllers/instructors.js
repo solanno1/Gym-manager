@@ -51,10 +51,16 @@ module.exports = {
                 return res.send("Please, fill all fields")
             }
         }
-        return
+        
+        Instructor.update(req.body, function(){
+            return res.redirect(`/instructors/${req.body.id}`)
+        })
+
     },
     delete(req, res) {
-        return
+        Instructor.delete(req.body.id, function(){
+            return res.redirect(`/instructors`)
+        })
     }
 }
 
