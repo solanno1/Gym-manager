@@ -2,13 +2,13 @@ const { date } = require("../../lib/utils")
 const db = require('../../config/db')
 
 module.exports = {
-    all(callback){
+    all(callback) {
         db.query(`select instructors.*, count(members) AS total_students
         from instructors
         LEFT JOIN members ON (members.instructor_id = instructors.id)
         GROUP BY instructors.id
-        ORDER BY total_students DESC`, function(err, results){
-            if(err) throw `Database error ${err}`
+        ORDER BY total_students DESC`, function (err, results) {
+            if (err) throw `Database error ${err}`
             callback(results.rows)
         })
     },
@@ -24,7 +24,7 @@ module.exports = {
             ) VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING id
         `
-        const values =[
+        const values = [
             data.name,
             data.avatar_url,
             data.gender,
@@ -32,21 +32,33 @@ module.exports = {
             date(data.birth).iso,
             date(Date.now()).iso
         ]
-        db.query(query, values, function(err, results){
-            if(err) throw `Database error ${err}`
+        db.query(query, values, function (err, results) {
+            if (err) throw `Database error ${err}`
             callback(results.rows[0])
         })
     },
-    find(id, callback){
+    find(id, callback) {
         db.query(`
          SELECT *
          FROM instructors
-         WHERE id = $1`, [id], function(err, results){
-            if(err) throw `Database error ${err}`
+         WHERE id = $1`, [id], function (err, results) {
+            if (err) throw `Database error ${err}`
             callback(results.rows[0])
         })
     },
-    update(data, callback){
+    findBy(filter, callback) {
+        db.query(`select instructors.*, count(members) AS total_students
+        from instructors
+        LEFT JOIN members ON (members.instructor_id = instructors.id)
+        WHERE instructors.name ILIKE '%${filter}%'
+        OR instructors.services ILIKE '%${filter}%'
+        GROUP BY instructors.id
+        ORDER BY total_students DESC`, function (err, results) {
+            if (err) throw `Database error ${err}`
+            callback(results.rows)
+        })
+    },
+    update(data, callback) {
         const query = `
         UPDATE instructors SET
             avatar_url=($1),
@@ -64,16 +76,48 @@ module.exports = {
             data.services,
             data.id
         ]
-        db.query(query, values, function(err, results){
-            if(err) throw `Database error ${err}`
+        db.query(query, values, function (err, results) {
+            if (err) throw `Database error ${err}`
 
             callback()
         })
     },
-    delete(id, callback){
-        db.query(`DELETE FROM instructors WHERE id = $1`, [id], function(err, results){
-            if(err) throw `Database error ${err}`
+    delete(id, callback) {
+        db.query(`DELETE FROM instructors WHERE id = $1`, [id], function (err, results) {
+            if (err) throw `Database error ${err}`
             return callback()
         })
+    },
+    paginate(params) {
+        const {filter, limit, offset, callback} = params
+        let query = "",
+        filterQuery = "",
+        totalQuery = `(
+            SELECT count(*) FROM instructors
+        ) AS total`
+
+       
+
+        if(filter){
+            filterQuery = `
+            WHERE instructors.name ILIKE '%${filter}%'
+            OR instructors.services ILIKE '%${filter}%'
+            `
+            totalQuery = `(
+                SELECT count(*) FROM instructors
+                ${filterQuery}
+            ) as total`
+        }
+
+        query = `SELECT instructors.*, ${totalQuery} ,COUNT(members) AS total_students FROM instructors
+        LEFT JOIN members ON (instructors.id = members.instructor_id)
+        ${filterQuery}
+        GROUP BY instructors.id
+        LIMIT $1 OFFSET $2`
+
+        db.query(query, [limit, offset], function(err, results){
+            if(err) throw `Database error ${err}`
+            callback(results.rows)
+        })        
     }
 }
